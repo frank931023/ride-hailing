@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ride Hailing Demo</title>
+    <script>
+        async function requestRide() {
+            const passenger = {
+                id: "1",
+                name: "Test Passenger",
+                phoneNumber: "1234567890"
+            };
+            const rideRequest = {
+                passenger: passenger,
+                pickUpLocation: document.getElementById("pickup").value,
+                destination: document.getElementById("destination").value
+            };
+
+            const response = await fetch("/api/rides/request", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(rideRequest)
+            });
+
+            const data = await response.json();
+            alert("Ride Requested: " + JSON.stringify(data));
+        }
+
+        async function cancelRide() {
+            const rideId = document.getElementById("rideId").value;
+            const rideRequest = { id: rideId };
+
+            await fetch("/api/rides/cancel", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(rideRequest)
+            });
+
+            alert("Ride Canceled");
+        }
+    </script>
+</head>
+<body>
+    <h1>Ride Hailing Demo</h1>
+    <div>
+        <h2>Request a Ride</h2>
+        <label for="pickup">Pickup Location:</label>
+        <input type="text" id="pickup" />
+        <label for="destination">Destination:</label>
+        <input type="text" id="destination" />
+        <button onclick="requestRide()">Request Ride</button>
+    </div>
+    <div>
+        <h2>Cancel a Ride</h2>
+        <label for="rideId">Ride ID:</label>
+        <input type="text" id="rideId" />
+        <button onclick="cancelRide()">Cancel Ride</button>
+    </div>
+</body>
+</html>
