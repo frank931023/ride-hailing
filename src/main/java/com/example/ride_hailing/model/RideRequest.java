@@ -54,4 +54,12 @@ public class RideRequest {
     public Driver getDriver() {
         return driver;
     }
+
+    public String getPickUpLocation() {
+        return pickUpLocation;
+    }
+
+    public String getDestination() {
+        return destination;
+    }
 }
