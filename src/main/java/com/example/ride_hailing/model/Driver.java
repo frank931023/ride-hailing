@@ -14,6 +14,18 @@ public class Driver {
         this.isAvailable = isAvailable;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public boolean isAvailable() {
+        return isAvailable;
+    }
+
     public boolean acceptRide(RideRequest rideRequest) {
         if (!isAvailable) {
             System.out.println("Driver is not available.");
