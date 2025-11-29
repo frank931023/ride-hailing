@@ -43,23 +43,23 @@ public class Driver {
         rideRequest.updateStatus("Canceled");
     }
 
-    public void startTrip(RideRequest rideRequest) {
-        if (rideRequest.getDriver() != this) {
-            System.out.println("This driver is not assigned to the ride.");
-            return;
-        }
-        rideRequest.updateStatus("In Progress");
-        System.out.println("Trip started by driver: " + name);
-    }
+    // public void startTrip(RideRequest rideRequest) {
+    //     if (rideRequest.getDriver() != this) {
+    //         System.out.println("This driver is not assigned to the ride.");
+    //         return;
+    //     }
+    //     rideRequest.updateStatus("In Progress");
+    //     System.out.println("Trip started by driver: " + name);
+    // }
 
-    public void completeTrip(RideRequest rideRequest) {
-        if (rideRequest.getDriver() != this) {
-            System.out.println("This driver is not assigned to the ride.");
-            return;
-        }
-        rideRequest.updateStatus("Completed");
-        this.isAvailable = true;
-        System.out.println("Trip completed by driver: " + name);
-    }
+    // public void completeTrip(RideRequest rideRequest) {
+    //     if (rideRequest.getDriver() != this) {
+    //         System.out.println("This driver is not assigned to the ride.");
+    //         return;
+    //     }
+    //     rideRequest.updateStatus("Completed");
+    //     this.isAvailable = true;
+    //     System.out.println("Trip completed by driver: " + name);
+    // }
 
 }

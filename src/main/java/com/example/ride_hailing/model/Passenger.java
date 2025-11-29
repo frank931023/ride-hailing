@@ -36,21 +36,21 @@ public class Passenger {
         System.out.println("Ride canceled by passenger: " + name);
     }
 
-    public void viewDriverInfo(Driver driver) {
-        System.out.println("Driver Info: Name - " + driver.getName() + ", Phone - " + driver.getPhoneNumber());
-    }
+    // public void viewDriverInfo(Driver driver) {
+    //     System.out.println("Driver Info: Name - " + driver.getName() + ", Phone - " + driver.getPhoneNumber());
+    // }
 
     public void trackRideStatus(RideRequest rideRequest) {
         System.out.println("Ride Status: " + rideRequest.getStatus());
     }
 
-    public void chooseDriver(Driver driver, RideRequest rideRequest) {
-        if (!rideRequest.getPassenger().equals(this)) {
-            System.out.println("This passenger is not associated with the ride.");
-            return;
-        }
-        rideRequest.setDriver(driver);
-        System.out.println("Driver chosen: " + driver.getName());
-    }
+    // public void chooseDriver(Driver driver, RideRequest rideRequest) {
+    //     if (!rideRequest.getPassenger().equals(this)) {
+    //         System.out.println("This passenger is not associated with the ride.");
+    //         return;
+    //     }
+    //     rideRequest.setDriver(driver);
+    //     System.out.println("Driver chosen: " + driver.getName());
+    // }
 
 }
