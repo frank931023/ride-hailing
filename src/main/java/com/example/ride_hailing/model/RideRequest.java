@@ -45,21 +45,21 @@ public class RideRequest {
         return status;
     }
 
-    public Passenger getPassenger() {
-        return passenger;
-    }
+    // public Passenger getPassenger() {
+    //     return passenger;
+    // }
 
-    public Driver getDriver() {
-        return driver;
-    }
+    // public Driver getDriver() {
+    //     return driver;
+    // }
 
-    public String getPickUpLocation() {
-        return pickUpLocation;
-    }
+    // public String getPickUpLocation() {
+    //     return pickUpLocation;
+    // }
 
-    public String getDestination() {
-        return destination;
-    }
+    // public String getDestination() {
+    //     return destination;
+    // }
 
     public void newRide(Passenger passenger, String pickUpLocation, String destination) {
         this.id = UUID.randomUUID().toString();

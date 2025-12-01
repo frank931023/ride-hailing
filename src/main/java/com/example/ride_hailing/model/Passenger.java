@@ -31,24 +31,24 @@ public class Passenger {
 
     // the passenger cancel the ride "actively"
     public void cancelRide(RideRequest rideRequest) {
-        if (!rideRequest.getPassenger().equals(this)) {
-            System.out.println("This passenger is not associated with the ride.");
-            return;
-        }
+        // if (!rideRequest.getPassenger().equals(this)) {
+        //     System.out.println("This passenger is not associated with the ride.");
+        //     return;
+        // }
         rideRequest.updateStatus("Cancelled");
         System.out.println("Ride canceled by passenger: " + name);
     }
 
     public void chooseDriver(Driver chosenDriver, RideRequest rideRequest) {
-        if (!rideRequest.getPassenger().equals(this)) {
-            System.out.println("This passenger is not associated with the ride.");
-            return;
-        }
+        // if (!rideRequest.getPassenger().equals(this)) {
+        //     System.out.println("This passenger is not associated with the ride.");
+        //     return;
+        // }
 
-        if (chosenDriver == null) {
-            System.out.println("No driver was chosen.");
-            return;
-        }
+        // if (chosenDriver == null) {
+        //     System.out.println("No driver was chosen.");
+        //     return;
+        // }
 
         // the status should turn to "matched" only after driver's second confirmation
         if (chosenDriver.isAvailable()) {
