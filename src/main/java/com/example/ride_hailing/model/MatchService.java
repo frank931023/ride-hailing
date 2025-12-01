@@ -37,4 +37,14 @@ public class MatchService {
         }
     }
 
+    // Collect available drivers and let the passenger choose one
+    public void matchDriver(Passenger passenger, RideRequest rideRequest) {
+        List<Driver> availableDrivers = askAvailableDriver(rideRequest);
+        if (!availableDrivers.isEmpty()) {
+            passenger.chooseDriver(availableDrivers, rideRequest);
+        } else {
+            System.out.println("No drivers available to match with the passenger.");
+        }
+    }
+
 }

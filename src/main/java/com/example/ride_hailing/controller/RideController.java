@@ -2,33 +2,63 @@ package com.example.ride_hailing.controller;
 
 import com.example.ride_hailing.model.*;
 import com.example.ride_hailing.service.RideService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import java.util.ArrayList;
+
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/rides")
 public class RideController {
 
+    @Autowired
     private RideService rideService;
-    private List<Driver> drivers = new ArrayList<>();
 
-    public RideController() {
-        // Initialize with some dummy drivers
-        drivers.add(new Driver("1", "John Doe", "1234567890", true));
-        drivers.add(new Driver("2", "Jane Smith", "0987654321", true));
-        // this.rideService = new RideService(drivers);
+    @GetMapping("/drivers")
+    public List<Driver> getAllDrivers() {
+        return rideService.getAllDrivers();
     }
 
-    // @PostMapping("/request")
-    // public RideRequest requestRide(@RequestBody RideRequest rideRequest) {
-    //     Passenger passenger = rideRequest.getPassenger();
-    //     return rideService.createRideRequest(passenger, rideRequest.getPickUpLocation(), rideRequest.getDestination());
-    // }
+    @PostMapping("/request")
+    public RideRequest requestRide(@RequestBody Map<String, String> payload) {
+        String pickUpLocation = payload.get("pickUpLocation");
+        String destination = payload.get("destination");
+        return rideService.createRideRequest(pickUpLocation, destination);
+    }
 
-    // @PostMapping("/cancel")
-    // public void cancelRide(@RequestBody RideRequest rideRequest) {
-    //     Passenger passenger = rideRequest.getPassenger();
-    //     rideService.cancelRideRequest(passenger, rideRequest);
-    // }
+    @PostMapping("/cancel")
+    public void cancelRide() {
+        rideService.cancelRideRequest();
+    }
+
+    @GetMapping("/current")
+    public RideRequest getCurrentRideRequest() {
+        return rideService.getCurrentRideRequest();
+    }
+
+    @GetMapping("/available-drivers")
+    public List<Driver> getAvailableDrivers() {
+        return rideService.getAvailableDrivers();
+    }
+
+    @PostMapping("/choose-driver")
+    public void chooseDriver(@RequestBody Map<String, String> payload) {
+        String driverName = payload.get("driverName");
+        rideService.passengerChooseDriver(driverName);
+    }
+
+    @PostMapping("/driver-confirm")
+    public boolean driverConfirm(@RequestBody Map<String, Object> payload) {
+        String driverName = (String) payload.get("driverName");
+        boolean confirm = (Boolean) payload.get("confirm");
+        return rideService.driverConfirmRide(driverName, confirm);
+    }
+
+    @PostMapping("/driver-status")
+    public void setDriverStatus(@RequestBody Map<String, Object> payload) {
+        String driverName = (String) payload.get("driverName");
+        boolean available = (Boolean) payload.get("available");
+        rideService.setDriverAvailability(driverName, available);
+    }
 }

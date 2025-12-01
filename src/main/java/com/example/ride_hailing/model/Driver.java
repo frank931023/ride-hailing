@@ -36,6 +36,7 @@ public class Driver {
         if (!confirmRide) {
             System.out.println("Driver declined to confirm the ride.");
             rideRequest.updateStatus("Initiate");
+            rideRequest.setDriver(null);
             return false;
         }
         this.isAvailable = false;

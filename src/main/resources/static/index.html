@@ -4,62 +4,280 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ride Hailing Demo</title>
+    <style>
+        body { display: flex; height: 100vh; margin: 0; font-family: sans-serif; }
+        .passenger-panel { flex: 1; border-right: 2px solid #ccc; padding: 20px; background-color: #f0f8ff; }
+        .drivers-panel { flex: 1; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+        .driver-box { border: 1px solid #ccc; padding: 20px; overflow: auto; }
+        .driver-1 { background-color: #fff0f0; }
+        .driver-2 { background-color: #f0fff0; }
+        .driver-3 { background-color: #f0f0ff; }
+        .driver-4 { background-color: #fff0ff; }
+        h2 { margin-top: 0; }
+        .status-box { margin-top: 10px; padding: 10px; border: 1px solid #999; background: #fff; }
+        button { margin-top: 5px; padding: 8px 15px; cursor: pointer; }
+        input { padding: 5px; margin-bottom: 5px; }
+        .driver-item { border: 1px solid #ddd; padding: 5px; margin: 5px 0; display: flex; justify-content: space-between; align-items: center; }
+    </style>
+</head>
+<body>
+    <div class="passenger-panel">
+        <h2>Passenger</h2>
+        <div>
+            <label>Pickup: <input type="text" id="pickup" value="Station A"></label><br>
+            <label>Dest: <input type="text" id="dest" value="Station B"></label><br>
+            <button onclick="requestRide()">Request Ride</button>
+            <button onclick="cancelRide()" style="background-color: #ffcccc;">Cancel Ride</button>
+        </div>
+        <div id="passenger-status" class="status-box">Status: Idle</div>
+        
+        <h3>Available Drivers</h3>
+        <div id="available-drivers-list"></div>
+    </div>
+
+    <div class="drivers-panel">
+        <!-- Driver 1 -->
+        <div class="driver-box driver-1">
+            <h2>Driver 1</h2>
+            <div id="driver1-avail">Availability: <span style="color:green">Available</span></div>
+            <button onclick="toggleDriverStatus('Driver 1')">Toggle Availability</button>
+            
+            <div id="driver1-request" class="status-box" style="display:none;">
+                <strong>Incoming Request!</strong>
+                <p>Passenger wants a ride.</p>
+                <button onclick="confirmRide('Driver 1', true)">Accept</button>
+                <button onclick="confirmRide('Driver 1', false)">Decline</button>
+            </div>
+            <div id="driver1-msg" style="margin-top:10px; font-weight:bold;"></div>
+        </div>
+
+        <!-- Driver 2 -->
+        <div class="driver-box driver-2">
+            <h2>Driver 2</h2>
+            <div id="driver2-avail">Availability: <span style="color:green">Available</span></div>
+            <button onclick="toggleDriverStatus('Driver 2')">Toggle Availability</button>
+            
+            <div id="driver2-request" class="status-box" style="display:none;">
+                <strong>Incoming Request!</strong>
+                <p>Passenger wants a ride.</p>
+                <button onclick="confirmRide('Driver 2', true)">Accept</button>
+                <button onclick="confirmRide('Driver 2', false)">Decline</button>
+            </div>
+            <div id="driver2-msg" style="margin-top:10px; font-weight:bold;"></div>
+        </div>
+
+        <!-- Driver 3 -->
+        <div class="driver-box driver-3">
+            <h2>Driver 3</h2>
+            <div id="driver3-avail">Availability: <span style="color:green">Available</span></div>
+            <button onclick="toggleDriverStatus('Driver 3')">Toggle Availability</button>
+            
+            <div id="driver3-request" class="status-box" style="display:none;">
+                <strong>Incoming Request!</strong>
+                <p>Passenger wants a ride.</p>
+                <button onclick="confirmRide('Driver 3', true)">Accept</button>
+                <button onclick="confirmRide('Driver 3', false)">Decline</button>
+            </div>
+            <div id="driver3-msg" style="margin-top:10px; font-weight:bold;"></div>
+        </div>
+
+        <!-- Driver 4 -->
+        <div class="driver-box driver-4">
+            <h2>Driver 4</h2>
+            <div id="driver4-avail">Availability: <span style="color:green">Available</span></div>
+            <button onclick="toggleDriverStatus('Driver 4')">Toggle Availability</button>
+            
+            <div id="driver4-request" class="status-box" style="display:none;">
+                <strong>Incoming Request!</strong>
+                <p>Passenger wants a ride.</p>
+                <button onclick="confirmRide('Driver 4', true)">Accept</button>
+                <button onclick="confirmRide('Driver 4', false)">Decline</button>
+            </div>
+            <div id="driver4-msg" style="margin-top:10px; font-weight:bold;"></div>
+        </div>
+    </div>
+
     <script>
+        let driverAvailability = {
+            'Driver 1': true,
+            'Driver 2': true,
+            'Driver 3': true,
+            'Driver 4': true
+        };
+        // Track which drivers have rejected the current ride
+        let rejectedDrivers = new Set();
+        let currentRideId = null;
+
+        // Poll for updates every 1 second
+        setInterval(pollStatus, 1000);
+
         async function requestRide() {
-            const passenger = {
-                id: "1",
-                name: "Test Passenger",
-                phoneNumber: "1234567890"
-            };
-            const rideRequest = {
-                passenger: passenger,
-                pickUpLocation: document.getElementById("pickup").value,
-                destination: document.getElementById("destination").value
-            };
+            const pickup = document.getElementById('pickup').value;
+            const dest = document.getElementById('dest').value;
+            
+            // Reset rejected drivers for new request
+            rejectedDrivers.clear();
+            resetDriverMessages();
 
-            const response = await fetch("/api/rides/request", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(rideRequest)
+            const response = await fetch('/api/rides/request', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pickUpLocation: pickup, destination: dest })
             });
-
-            const data = await response.json();
-            alert("Ride Requested: " + JSON.stringify(data));
+            const ride = await response.json();
+            currentRideId = ride.id;
+            updatePassengerStatus("Ride Requested. Waiting for drivers...");
+            
+            // Immediately check for available drivers
+            checkAvailableDrivers();
         }
 
         async function cancelRide() {
-            const rideId = document.getElementById("rideId").value;
-            const rideRequest = { id: rideId };
+            await fetch('/api/rides/cancel', { method: 'POST' });
+            updatePassengerStatus("Ride Cancelled by Passenger.");
+            document.getElementById('available-drivers-list').innerHTML = '';
+            hideAllRequests();
+            resetDriverMessages();
+            currentRideId = null;
+        }
 
-            await fetch("/api/rides/cancel", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(rideRequest)
+        async function checkAvailableDrivers() {
+            const response = await fetch('/api/rides/available-drivers');
+            const drivers = await response.json();
+            
+            const listDiv = document.getElementById('available-drivers-list');
+            listDiv.innerHTML = '';
+            
+            if (drivers.length === 0) {
+                listDiv.innerHTML = '<p>No drivers available yet...</p>';
+            } else {
+                drivers.forEach(driver => {
+                    // Don't show drivers who have already rejected this ride
+                    if (rejectedDrivers.has(driver.name)) return;
+
+                    const div = document.createElement('div');
+                    div.className = 'driver-item';
+                    div.innerHTML = `
+                        <span>${driver.name}</span>
+                        <button onclick="chooseDriver('${driver.name}')">Choose</button>
+                    `;
+                    listDiv.appendChild(div);
+                });
+            }
+        }
+
+        async function chooseDriver(driverName) {
+            if (rejectedDrivers.has(driverName)) {
+                alert("This driver has already declined your request.");
+                return;
+            }
+            
+            await fetch('/api/rides/choose-driver', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ driverName: driverName })
+            });
+            updatePassengerStatus(`Waiting for ${driverName} to confirm...`);
+            document.getElementById('available-drivers-list').innerHTML = ''; // Clear list
+        }
+
+        async function confirmRide(driverName, confirm) {
+            await fetch('/api/rides/driver-confirm', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ driverName: driverName, confirm: confirm })
+            });
+            
+            const driverNum = driverName.split(' ')[1];
+            document.getElementById(`driver${driverNum}-request`).style.display = 'none';
+            
+            if (confirm) {
+                document.getElementById(`driver${driverNum}-msg`).innerText = "Ride Confirmed!";
+            } else {
+                document.getElementById(`driver${driverNum}-msg`).innerText = "Ride Declined.";
+                rejectedDrivers.add(driverName);
+                // If declined, passenger needs to know.
+                // The polling will see status is NOT matched.
+                // We might need to reset passenger status to "Choose another driver"
+                // But since we don't have a specific backend state for "Declined", 
+                // the passenger will just see the ride is still "Requested" (or "Initiate" if backend reset it).
+            }
+        }
+
+        async function toggleDriverStatus(driverName) {
+            const driverNum = driverName.split(' ')[1];
+            const isAvail = !driverAvailability[driverName];
+            driverAvailability[driverName] = isAvail;
+
+            await fetch('/api/rides/driver-status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ driverName: driverName, available: isAvail })
             });
 
-            alert("Ride Canceled");
+            const statusText = isAvail ? '<span style="color:green">Available</span>' : '<span style="color:red">Unavailable</span>';
+            document.getElementById(`driver${driverNum}-avail`).innerHTML = `Availability: ${statusText}`;
+        }
+
+        function hideAllRequests() {
+            for(let i=1; i<=4; i++) {
+                document.getElementById(`driver${i}-request`).style.display = 'none';
+            }
+        }
+
+        function resetDriverMessages() {
+            for(let i=1; i<=4; i++) {
+                document.getElementById(`driver${i}-msg`).innerText = "";
+            }
+        }
+
+        async function pollStatus() {
+            // Get current ride status
+            const rideRes = await fetch('/api/rides/current');
+            if (rideRes.ok) {
+                const ride = await rideRes.json();
+                
+                // If ride is null (cancelled), clear UI
+                if (!ride) {
+                    if (currentRideId) { // If we thought we had a ride
+                         updatePassengerStatus("Ride Cancelled or Ended.");
+                         hideAllRequests();
+                         currentRideId = null;
+                    }
+                    return;
+                }
+
+                if (ride.status === 'Matched') {
+                    updatePassengerStatus(`Ride Matched! Driver: ${ride.driver.name}`);
+                    document.getElementById('available-drivers-list').innerHTML = '';
+                } else if (ride.status === 'Requested' || ride.status === 'Initiate') {
+                     if (!ride.driver) {
+                        if (ride.status === 'Initiate') {
+                            updatePassengerStatus("Driver declined. Please choose another.");
+                        }
+                        checkAvailableDrivers();
+                     }
+                } else if (ride.status === 'Cancelled') {
+                    updatePassengerStatus("Ride Cancelled.");
+                    hideAllRequests();
+                }
+                
+                if (ride.driver) {
+                    // A driver has been chosen by passenger. Show request to that driver.
+                    const driverName = ride.driver.name;
+                    
+                    if (ride.status !== 'Matched' && !rejectedDrivers.has(driverName)) {
+                        // Show request to driver if not matched and not rejected
+                        const driverNum = driverName.split(' ')[1];
+                        document.getElementById(`driver${driverNum}-request`).style.display = 'block';
+                    }
+                }
+            }
+        }
+
+        function updatePassengerStatus(msg) {
+            document.getElementById('passenger-status').innerText = "Status: " + msg;
         }
     </script>
-</head>
-<body>
-    <h1>Ride Hailing Demo</h1>
-    <div>
-        <h2>Request a Ride</h2>
-        <label for="pickup">Pickup Location:</label>
-        <input type="text" id="pickup" />
-        <label for="destination">Destination:</label>
-        <input type="text" id="destination" />
-        <button onclick="requestRide()">Request Ride</button>
-    </div>
-    <div>
-        <h2>Cancel a Ride</h2>
-        <label for="rideId">Ride ID:</label>
-        <input type="text" id="rideId" />
-        <button onclick="cancelRide()">Cancel Ride</button>
-    </div>
 </body>
 </html>

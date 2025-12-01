@@ -1,5 +1,6 @@
 package com.example.ride_hailing.model;
 
+import java.util.List;
 import java.util.UUID;
 
 public class Passenger {
@@ -39,21 +40,16 @@ public class Passenger {
         System.out.println("Ride canceled by passenger: " + name);
     }
 
-    public void chooseDriver(Driver chosenDriver, RideRequest rideRequest) {
-        // if (!rideRequest.getPassenger().equals(this)) {
-        //     System.out.println("This passenger is not associated with the ride.");
-        //     return;
-        // }
+    public void chooseDriver(List<Driver> availableDrivers, RideRequest rideRequest) {
+        if (availableDrivers == null || availableDrivers.isEmpty()) {
+            System.out.println("No drivers available to choose from.");
+            return;
+        }
 
-        // if (chosenDriver == null) {
-        //     System.out.println("No driver was chosen.");
-        //     return;
-        // }
-
-        // the status should turn to "matched" only after driver's second confirmation
+        // For simplicity, choose the first available driver
+        Driver chosenDriver = availableDrivers.get(0);
         if (chosenDriver.isAvailable()) {
             rideRequest.setDriver(chosenDriver);
-            // rideRequest.updateStatus("Matched");
             System.out.println("Driver chosen: " + chosenDriver.getName());
         } else {
             System.out.println("Driver is no longer available.");
