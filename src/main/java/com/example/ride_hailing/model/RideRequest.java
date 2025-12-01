@@ -1,5 +1,7 @@
 package com.example.ride_hailing.model;
 
+import java.util.UUID;
+
 public class RideRequest {
 
     private String id;
@@ -8,6 +10,10 @@ public class RideRequest {
     private String pickUpLocation;
     private String destination;
     private String status;
+
+    public RideRequest() {
+        // Default constructor for creating an empty RideRequest instance
+    }
 
     public RideRequest(
         String id, 
@@ -25,22 +31,14 @@ public class RideRequest {
         this.status = status;
     }
 
-    public void updateStatus(String newStatus) {
-        if (newStatus == null || newStatus.isEmpty()) {
-            System.out.println("Invalid status.");
-            return;
-        }
-        this.status = newStatus;
-        System.out.println("Ride status updated to: " + status);
-    }
-
-    public void setDriver(Driver driver) {
-        if (driver == null) {
-            System.out.println("Invalid driver.");
-            return;
-        }
-        this.driver = driver;
-        System.out.println("Driver assigned: " + driver.getName());
+    public RideRequest(Passenger passenger, String pickUpLocation, String destination) {
+        this.id = UUID.randomUUID().toString();
+        this.passenger = passenger;
+        this.driver = null;
+        this.pickUpLocation = pickUpLocation;
+        this.destination = destination;
+        this.status = "Initiate";
+        System.out.println("New ride created: " + id);
     }
 
     public String getStatus() {
@@ -61,5 +59,28 @@ public class RideRequest {
 
     public String getDestination() {
         return destination;
+    }
+
+    public void newRide(Passenger passenger, String pickUpLocation, String destination) {
+        this.id = UUID.randomUUID().toString();
+        this.passenger = passenger;
+        this.pickUpLocation = pickUpLocation;
+        this.destination = destination;
+        this.status = "Requested";
+        System.out.println("New ride created: " + id);
+    }
+
+    public void updateStatus(String newStatus) {
+        if (newStatus == null || newStatus.isEmpty()) {
+            System.out.println("Invalid status.");
+            return;
+        }
+        this.status = newStatus;
+        System.out.println("Ride status updated to: " + status);
+    }
+
+    public void setDriver(Driver driver) {
+        this.driver = driver;
+        System.out.println("Driver assigned: " + driver.getName());
     }
 }

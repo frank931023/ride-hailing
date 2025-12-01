@@ -26,40 +26,22 @@ public class Driver {
         return isAvailable;
     }
 
-    public boolean acceptRide(RideRequest rideRequest) {
-        if (!isAvailable) {
-            System.out.println("Driver is not available.");
+    public void setAvailable(boolean newStatus) {
+        this.isAvailable = newStatus;
+        System.out.println("Driver " + name + " availability set to: " + (newStatus ? "Available" : "Unavailable"));
+    }
+
+    // the driver confimr the ride, the status change into "matched"
+    public boolean confirm(RideRequest rideRequest, boolean confirmRide) {
+        if (!confirmRide) {
+            System.out.println("Driver declined to confirm the ride.");
+            rideRequest.updateStatus("Initiate");
             return false;
         }
         this.isAvailable = false;
         rideRequest.setDriver(this);
         rideRequest.updateStatus("Matched");
-        System.out.println("Ride accepted by driver: " + name);
+        System.out.println("Ride confirmed by driver: " + name);
         return true;
     }
-
-    public void rejectRide(RideRequest rideRequest) {
-        System.out.println("Ride rejected by driver: " + name);
-        rideRequest.updateStatus("Canceled");
-    }
-
-    // public void startTrip(RideRequest rideRequest) {
-    //     if (rideRequest.getDriver() != this) {
-    //         System.out.println("This driver is not assigned to the ride.");
-    //         return;
-    //     }
-    //     rideRequest.updateStatus("In Progress");
-    //     System.out.println("Trip started by driver: " + name);
-    // }
-
-    // public void completeTrip(RideRequest rideRequest) {
-    //     if (rideRequest.getDriver() != this) {
-    //         System.out.println("This driver is not assigned to the ride.");
-    //         return;
-    //     }
-    //     rideRequest.updateStatus("Completed");
-    //     this.isAvailable = true;
-    //     System.out.println("Trip completed by driver: " + name);
-    // }
-
 }

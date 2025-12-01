@@ -1,33 +1,40 @@
 package com.example.ride_hailing.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MatchService {
 
+    // private RideRequest ridequest;
     private List<Driver> drivers;
 
     public MatchService(List<Driver> drivers) {
         this.drivers = drivers;
     }
 
-    public Driver matchDriver(RideRequest rideRequest) {
+    // send the request to all the drivers, and get the available driver list
+    public List<Driver> askAvailableDriver(RideRequest rideRequest) {
+        List<Driver> availableDrivers = new ArrayList<>();
         for (Driver driver : drivers) {
             if (driver.isAvailable()) {
-                driver.acceptRide(rideRequest);
-                System.out.println("Driver matched: " + driver.getName());
-                return driver;
+                availableDrivers.add(driver);
             }
         }
-        System.out.println("No available drivers at the moment.");
-        return null;
+        if (availableDrivers.isEmpty()) {
+            System.out.println("No available drivers at the moment.");
+        } else {
+            System.out.println("Available drivers collected.");
+        }
+        return availableDrivers;
     }
 
-    public void notifyPassenger(RideRequest rideRequest) {
-        System.out.println("Notification sent to passenger: Ride status - " + rideRequest.getStatus());
-    }
-
-    public void notifyDriver(RideRequest rideRequest) {
-        System.out.println("Notification sent to driver: Ride status - " + rideRequest.getStatus());
+    // send the collected accepted drivers to the passenger
+    public void sendAcceptedDriver(List<Driver> drivers, RideRequest rideRequest) {
+        rideRequest.updateStatus("Pending");
+        System.out.println("Available drivers sent to passenger.");
+        for (Driver driver : drivers) {
+            System.out.println("Driver: " + driver.getName());
+        }
     }
 
 }

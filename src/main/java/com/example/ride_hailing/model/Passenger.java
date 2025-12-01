@@ -14,43 +14,50 @@ public class Passenger {
         this.phoneNumber = phoneNumber;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
     public RideRequest requestRide(String pickUpLocation, String destination) {
-        RideRequest rideRequest = new RideRequest(
-            UUID.randomUUID().toString(),
-            this,
-            null,
-            pickUpLocation,
-            destination,
-            "Pending"
-        );
+        RideRequest rideRequest = new RideRequest();
+        rideRequest.newRide(this, pickUpLocation, destination);
         System.out.println("Ride requested by passenger: " + name);
         return rideRequest;
     }
 
+    // the passenger cancel the ride "actively"
     public void cancelRide(RideRequest rideRequest) {
         if (!rideRequest.getPassenger().equals(this)) {
             System.out.println("This passenger is not associated with the ride.");
             return;
         }
-        rideRequest.updateStatus("Canceled");
+        rideRequest.updateStatus("Cancelled");
         System.out.println("Ride canceled by passenger: " + name);
     }
 
-    // public void viewDriverInfo(Driver driver) {
-    //     System.out.println("Driver Info: Name - " + driver.getName() + ", Phone - " + driver.getPhoneNumber());
-    // }
+    public void chooseDriver(Driver chosenDriver, RideRequest rideRequest) {
+        if (!rideRequest.getPassenger().equals(this)) {
+            System.out.println("This passenger is not associated with the ride.");
+            return;
+        }
 
-    public void trackRideStatus(RideRequest rideRequest) {
-        System.out.println("Ride Status: " + rideRequest.getStatus());
+        if (chosenDriver == null) {
+            System.out.println("No driver was chosen.");
+            return;
+        }
+
+        // the status should turn to "matched" only after driver's second confirmation
+        if (chosenDriver.isAvailable()) {
+            rideRequest.setDriver(chosenDriver);
+            // rideRequest.updateStatus("Matched");
+            System.out.println("Driver chosen: " + chosenDriver.getName());
+        } else {
+            System.out.println("Driver is no longer available.");
+        }
     }
-
-    // public void chooseDriver(Driver driver, RideRequest rideRequest) {
-    //     if (!rideRequest.getPassenger().equals(this)) {
-    //         System.out.println("This passenger is not associated with the ride.");
-    //         return;
-    //     }
-    //     rideRequest.setDriver(driver);
-    //     System.out.println("Driver chosen: " + driver.getName());
-    // }
 
 }
