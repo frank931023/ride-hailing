@@ -1,22 +1,23 @@
-# Build stage
-FROM eclipse-temurin:17-jdk-alpine AS build
-WORKDIR /workspace/app
+FROM eclipse-temurin:17-jdk-alpine
+WORKDIR /app
 
+# 安裝 Maven
+RUN apk add --no-cache maven
+
+# 複製 Maven wrapper 和 pom.xml
 COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
+
+# 下載依賴（這層會被快取）
+RUN chmod +x mvnw
+RUN ./mvnw dependency:go-offline -B
+
+# 複製源碼
 COPY src src
 
-# Grant execution rights on the mvnw wrapper
-RUN chmod +x mvnw
-RUN ./mvnw install -DskipTests
-RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
+# 暴露端口
+EXPOSE 8080 5005
 
-# Run stage
-FROM eclipse-temurin:17-jdk-alpine
-VOLUME /tmp
-ARG DEPENDENCY=/workspace/app/target/dependency
-COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
-COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
-COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
-ENTRYPOINT ["java","-cp","app:app/lib/*","com.example.ride_hailing.RideHailingApplication"]
+# 使用 spring-boot:run 啟動，支援 devtools hot-reload
+CMD ["./mvnw", "spring-boot:run", "-Dspring-boot.run.jvmArguments=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"]
