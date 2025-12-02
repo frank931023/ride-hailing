@@ -434,7 +434,7 @@
                             <span class="info-label">狀態：</span>
                             <span id="currentStatus"></span>
                         </div>
-                        <button class="btn btn-danger w-100 mt-3" onclick="cancelRideRequest()">
+                        <button class="btn btn-danger w-100 mt-3" id="cancelButton" onclick="cancelRideRequest()">
                             <i class="fas fa-times"></i> 取消行程
                         </button>
                     </div>
@@ -567,7 +567,8 @@
         async function loadDrivers() {
             try {
                 const response = await fetch(`${API_BASE}/drivers`);
-                const driversList = await response.json();
+                const text = await response.text();
+                const driversList = text ? JSON.parse(text) : [];
                 driversList.forEach(driver => {
                     drivers[driver.id] = driver;
                 });
@@ -594,10 +595,15 @@
                     body: JSON.stringify({ pickUpLocation, destination, expectedPickUpTime })
                 });
                 
-                currentRequest = await response.json();
-                document.getElementById('requestForm').style.display = 'none';
-                document.getElementById('currentRideInfo').style.display = 'block';
-                updateUI();
+                const text = await response.text();
+                currentRequest = text ? JSON.parse(text) : null;
+                if (currentRequest) {
+                    document.getElementById('requestForm').style.display = 'none';
+                    document.getElementById('currentRideInfo').style.display = 'block';
+                    updateUI();
+                } else {
+                    alert('建立請求失敗，請稍後再試！');
+                }
             } catch (error) {
                 console.error('建立請求失敗:', error);
                 alert('建立請求失敗，請稍後再試！');
@@ -767,6 +773,7 @@
             document.getElementById('currentTime').textContent = currentRequest.expectedPickUpTime;
             
             const statusEl = document.getElementById('currentStatus');
+            const cancelButton = document.getElementById('cancelButton');
             let statusClass = 'status-initiate';
             let statusText = '等待報價';
             
@@ -774,10 +781,14 @@
                 statusClass = 'status-matched';
                 statusText = '已配對';
                 document.getElementById('bidsSection').style.display = 'none';
+                cancelButton.style.display = 'none';  // 配對成功後隱藏取消按鈕
                 showMatchedInfo();
             } else if (currentRequest.status === 'CANCELLED') {
                 statusClass = 'status-cancelled';
                 statusText = '已取消';
+                cancelButton.style.display = 'none';
+            } else {
+                cancelButton.style.display = 'block';  // INITIATE 狀態顯示取消按鈕
             }
             
             statusEl.innerHTML = `<span class="status-badge ${statusClass}">${statusText}</span>`;
@@ -836,7 +847,10 @@
         async function showMatchedInfo() {
             try {
                 const response = await fetch(`${API_BASE}/contact-info`);
-                const data = await response.json();
+                const text = await response.text();
+                const data = text ? JSON.parse(text) : null;
+                if (!data) return;
+                
                 const selectedBid = currentRequest.selectedBid;
                 const driver = drivers[selectedBid.driverId];
                 
@@ -941,13 +955,23 @@
             const pendingBids = myBids.filter(bid => bid.status === 'PENDING');
             const withdrawnBids = myBids.filter(bid => bid.status === 'WITHDRAWN');
             
+            // 如果請求已配對，且司機的報價未被選中，則不顯示任何內容
+            if (currentRequest.status === 'MATCHED') {
+                const isMyBidSelected = myBids.some(bid => 
+                    currentRequest.selectedBid && currentRequest.selectedBid.id === bid.id
+                );
+                if (!isMyBidSelected) {
+                    myBidsEl.innerHTML = '';
+                    return;
+                }
+            }
+            
             if (myBids.length > 0) {
                 myBidsEl.innerHTML = myBids.map(bid => {
                     const isSelected = currentRequest.selectedBid && currentRequest.selectedBid.id === bid.id;
                     
                     if (isSelected) {
-                        statusEl.className = 'status-badge status-matched';
-                        statusEl.textContent = '已配對';
+                        // 不再變更司機狀態為「已配對」
                         return `
                             <div class="bid-form" style="background: #d1f2eb; border: 2px solid var(--success-color);">
                                 <h6 style="color: var(--success-color); margin-bottom: 10px;">
