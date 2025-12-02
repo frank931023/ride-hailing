@@ -5,46 +5,86 @@ import java.util.List;
 
 public class MatchService {
 
-    // private RideRequest ridequest;
+    private List<RideRequest> rideRequests;
+    private List<Passenger> passengers;
     private List<Driver> drivers;
 
     public MatchService(List<Driver> drivers) {
         this.drivers = drivers;
+        this.rideRequests = new ArrayList<>();
+        this.passengers = new ArrayList<>();
     }
 
-    // send the request to all the drivers, and get the available driver list
-    public List<Driver> askAvailableDriver(RideRequest rideRequest) {
-        List<Driver> availableDrivers = new ArrayList<>();
+    public List<RideRequest> getRideRequests() {
+        return rideRequests;
+    }
+
+    public List<Driver> getDrivers() {
+        return drivers;
+    }
+
+    public void addRideRequest(RideRequest rideRequest) {
+        this.rideRequests.add(rideRequest);
+        notifyAllDrivers(rideRequest);
+        System.out.println("RideRequest " + rideRequest.getId() + " added to MatchService.");
+    }
+
+    public void notifyAllDrivers(RideRequest rideRequest) {
+        System.out.println("Broadcasting RideRequest " + rideRequest.getId() + " to all drivers...");
         for (Driver driver : drivers) {
             if (driver.isAvailable()) {
-                availableDrivers.add(driver);
+                driver.notify(rideRequest);
             }
         }
-        if (availableDrivers.isEmpty()) {
-            System.out.println("No available drivers at the moment.");
-        } else {
-            System.out.println("Available drivers collected.");
-        }
-        return availableDrivers;
     }
 
-    // send the collected accepted drivers to the passenger
-    public void sendAcceptedDriver(List<Driver> drivers, RideRequest rideRequest) {
-        rideRequest.updateStatus("Pending");
-        System.out.println("Available drivers sent to passenger.");
+    public Driver getDriverById(String driverId) {
         for (Driver driver : drivers) {
-            System.out.println("Driver: " + driver.getName());
+            if (driver.getId().equals(driverId)) {
+                return driver;
+            }
+        }
+        return null;
+    }
+
+    public RideRequest getRideRequestById(String requestId) {
+        for (RideRequest request : rideRequests) {
+            if (request.getId().equals(requestId)) {
+                return request;
+            }
+        }
+        return null;
+    }
+
+    public void cancelRideRequest(RideRequest rideRequest) {
+        if (rideRequests.contains(rideRequest)) {
+            rideRequest.cancel();
+            System.out.println("RideRequest " + rideRequest.getId() + " cancelled in MatchService.");
         }
     }
 
-    // Collect available drivers and let the passenger choose one
-    public void matchDriver(Passenger passenger, RideRequest rideRequest) {
-        List<Driver> availableDrivers = askAvailableDriver(rideRequest);
-        if (!availableDrivers.isEmpty()) {
-            passenger.chooseDriver(availableDrivers, rideRequest);
-        } else {
-            System.out.println("No drivers available to match with the passenger.");
+    public String exchangeContactInfo(RideRequest rideRequest) {
+        if (rideRequest.getStatus() != RequestStatus.MATCHED) {
+            return "Cannot exchange contact info. Ride is not matched.";
         }
+        
+        Bid selectedBid = rideRequest.getSelectedBid();
+        if (selectedBid == null) {
+            return "No bid selected.";
+        }
+        
+        Driver driver = getDriverById(selectedBid.getDriverId());
+        if (driver == null) {
+            return "Driver not found.";
+        }
+        
+        Passenger passenger = rideRequest.getPassenger();
+        
+        String info = "Match completed! Contact information exchanged:\n";
+        info += "Passenger: " + passenger.getName() + " - " + passenger.getPhoneNumber() + "\n";
+        info += "Driver: " + driver.getName() + " - " + driver.getPhoneNumber();
+        
+        System.out.println(info);
+        return info;
     }
-
 }
