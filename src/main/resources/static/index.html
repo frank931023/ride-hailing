@@ -37,12 +37,34 @@
             color: white;
             padding: 30px;
             text-align: center;
+            position: relative;
         }
 
         .header h1 {
             margin: 0;
             font-weight: 700;
             font-size: 2.5rem;
+        }
+
+        .reset-button {
+            position: absolute;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .reset-button:hover {
+            background: white;
+            color: var(--primary-color);
+            transform: translateY(-50%) scale(1.05);
         }
 
         .content-wrapper {
@@ -381,6 +403,9 @@
         <div class="header">
             <h1><i class="fas fa-car"></i> 簡易乘車配對系統</h1>
             <p style="margin: 10px 0 0 0; opacity: 0.9;">即時乘客與司機配對平台</p>
+            <button class="reset-button" onclick="resetSystem()">
+                <i class="fas fa-redo"></i> 重置系統
+            </button>
         </div>
 
         <div class="content-wrapper">
@@ -1048,6 +1073,43 @@
                 document.getElementById(`bidForm${i}`).style.display = 'none';
                 document.getElementById(`myBids${i}`).innerHTML = '';
                 updateDriverStatus(i);
+            }
+        }
+
+        // 重置整個系統
+        async function resetSystem() {
+            if (!confirm('確定要重置整個系統嗎？這將清除所有資料！')) return;
+            
+            try {
+                // 如果有當前請求，先取消
+                if (currentRequest) {
+                    await fetch(`${API_BASE}/cancel`, { method: 'POST' });
+                }
+                
+                // 清空前端狀態
+                currentRequest = null;
+                allBids = [];
+                
+                // 重置所有司機為上線狀態
+                for (let i = 1; i <= 4; i++) {
+                    const driverId = i.toString();
+                    if (!driverAvailability[driverId]) {
+                        await fetch(`${API_BASE}/driver-status`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ driverId, available: true })
+                        });
+                        driverAvailability[driverId] = true;
+                    }
+                }
+                
+                // 重置UI
+                resetUI();
+                
+                alert('系統已重置！');
+            } catch (error) {
+                console.error('重置系統失敗:', error);
+                alert('重置失敗，請稍後再試！');
             }
         }
 
