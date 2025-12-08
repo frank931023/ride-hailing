@@ -60,50 +60,34 @@ public class RideRequest {
         return bids;
     }
 
-    public List<Bid> getPendingBids() {
-        List<Bid> pendingBids = new ArrayList<>();
-        for (Bid bid : bids) {
-            if (bid.isPending()) {
-                pendingBids.add(bid);
-            }
-        }
-        return pendingBids;
-    }
-
     public Bid getSelectedBid() {
         return selectedBid;
     }
 
+    // must
     public void addBid(Bid bid) {
         if (this.status != RequestStatus.INITIATE) {
             System.out.println("Cannot add bid. RideRequest status is not INITIATE.");
             return;
         }
         this.bids.add(bid);
-        System.out.println("Bid added to RideRequest " + id + " from driver " + bid.getDriverId());
+        System.out.println("Bid added to RideRequest " + id + " from driver " + bid.getDriver().getId());
     }
 
-    public void updateStatus(RequestStatus newStatus) {
-        if (newStatus == null) {
-            System.out.println("Invalid status.");
-            return;
-        }
-        this.status = newStatus;
-        System.out.println("Ride status updated to: " + status);
-    }
-
+    // must
     public void selectBid(Bid bid) {
         if (this.status != RequestStatus.INITIATE) {
             System.out.println("Cannot select bid. RideRequest is not in INITIATE status.");
             return;
         }
-        if (!this.bids.contains(bid) || !bid.isPending()) {
-            System.out.println("Invalid bid selection.");
+        if (!bids.contains(bid)) {
+            System.out.println("Bid not found in this request.");
             return;
         }
         this.selectedBid = bid;
         this.status = RequestStatus.MATCHED;
-        System.out.println("Bid selected and ride matched: " + bid.getId());
+        bid.setAccepted(true);
+        System.out.println("Bid " + bid.getId() + " selected. Ride matched.");
     }
 
     public void cancel() {

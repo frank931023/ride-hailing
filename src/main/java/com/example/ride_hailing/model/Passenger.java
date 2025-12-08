@@ -1,5 +1,6 @@
 package com.example.ride_hailing.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Passenger {
@@ -26,28 +27,20 @@ public class Passenger {
         return phoneNumber;
     }
 
-    public RideRequest createRequest(String pickUpLocation, String destination, String expectedPickUpTime) {
-        RideRequest rideRequest = new RideRequest(this, pickUpLocation, destination, expectedPickUpTime);
-        System.out.println("Ride requested by passenger: " + name);
-        return rideRequest;
+    // must
+    public List<Bid> updateBideList(RideRequest currentRideRequest) {
+        if (currentRideRequest != null) {
+            return currentRideRequest.getBids();
+        }
+        return new ArrayList<>();
     }
 
-    public void cancelRide(RideRequest rideRequest) {
-        if (rideRequest.getPassenger() != this) {
-            System.out.println("This passenger is not associated with the ride.");
-            return;
+    // must
+    public void showMatchSucess(RideRequest currentRideRequest) {
+        if (currentRideRequest != null && currentRideRequest.getStatus() == RequestStatus.MATCHED) {
+            System.out.println("Match Success! Ride " + currentRideRequest.getId() + " is matched.");
+        } else {
+            System.out.println("No successful match yet.");
         }
-        rideRequest.cancel();
-        System.out.println("Ride canceled by passenger: " + name);
-    }
-
-    public void selectBid(Bid bid, RideRequest rideRequest) {
-        if (rideRequest.getPassenger() != this) {
-            System.out.println("This passenger is not associated with the ride.");
-            return;
-        }
-        
-        rideRequest.selectBid(bid);
-        System.out.println("Passenger " + name + " selected bid: " + bid.getId());
     }
 }

@@ -6,13 +6,11 @@ import java.util.List;
 public class MatchService {
 
     private List<RideRequest> rideRequests;
-    private List<Passenger> passengers;
     private List<Driver> drivers;
 
     public MatchService(List<Driver> drivers) {
         this.drivers = drivers;
         this.rideRequests = new ArrayList<>();
-        this.passengers = new ArrayList<>();
     }
 
     public List<RideRequest> getRideRequests() {
@@ -21,21 +19,6 @@ public class MatchService {
 
     public List<Driver> getDrivers() {
         return drivers;
-    }
-
-    public void addRideRequest(RideRequest rideRequest) {
-        this.rideRequests.add(rideRequest);
-        notifyAllDrivers(rideRequest);
-        System.out.println("RideRequest " + rideRequest.getId() + " added to MatchService.");
-    }
-
-    public void notifyAllDrivers(RideRequest rideRequest) {
-        System.out.println("Broadcasting RideRequest " + rideRequest.getId() + " to all drivers...");
-        for (Driver driver : drivers) {
-            if (driver.isAvailable()) {
-                driver.notify(rideRequest);
-            }
-        }
     }
 
     public Driver getDriverById(String driverId) {
@@ -47,15 +30,20 @@ public class MatchService {
         return null;
     }
 
-    public RideRequest getRideRequestById(String requestId) {
-        for (RideRequest request : rideRequests) {
-            if (request.getId().equals(requestId)) {
-                return request;
+    // must
+    public void createRideRequest(RideRequest rideRequest) {
+        this.rideRequests.add(rideRequest);
+        System.out.println("RideRequest " + rideRequest.getId() + " added to MatchService.");
+        
+        System.out.println("Broadcasting RideRequest " + rideRequest.getId() + " to all drivers...");
+        for (Driver driver : drivers) {
+            if (driver.isAvailable()) {
+                driver.notifyNewRide(rideRequest);
             }
         }
-        return null;
     }
 
+    // must
     public void cancelRideRequest(RideRequest rideRequest) {
         if (rideRequests.contains(rideRequest)) {
             rideRequest.cancel();
@@ -73,7 +61,7 @@ public class MatchService {
             return "No bid selected.";
         }
         
-        Driver driver = getDriverById(selectedBid.getDriverId());
+        Driver driver = getDriverById(selectedBid.getDriver().getId());
         if (driver == null) {
             return "Driver not found.";
         }
@@ -86,5 +74,46 @@ public class MatchService {
         
         System.out.println(info);
         return info;
+    }
+
+    // must
+    public RideRequest createRideRequest(Passenger passenger, String pickUpLocation, String destination, String expectedPickUpTime) {
+        RideRequest rideRequest = new RideRequest(passenger, pickUpLocation, destination, expectedPickUpTime);
+        System.out.println("Ride requested by passenger: " + passenger.getName());
+        createRideRequest(rideRequest);
+        return rideRequest;
+    }
+
+    public void selectBid(String bidId, RideRequest rideRequest) {
+        for (Bid bid : rideRequest.getBids()) {
+            if (bid.getId().equals(bidId)) {
+                rideRequest.selectBid(bid);
+                
+                Driver driver = getDriverById(bid.getDriver().getId());
+                if (driver != null) {
+                    driver.setAvailable(false);
+                }
+                return;
+            }
+        }
+    }
+
+    // must
+    public Bid submitBid(String driverId, int price, RideRequest rideRequest) {
+        if (rideRequest.getStatus() != RequestStatus.INITIATE) {
+            System.out.println("Cannot submit bid. RideRequest is not in INITIATE status.");
+            return null;
+        }
+        
+        Driver driver = getDriverById(driverId);
+        if (driver == null) {
+            System.out.println("Driver not found: " + driverId);
+            return null;
+        }
+
+        Bid bid = new Bid(driver, price);
+        rideRequest.addBid(bid);
+        System.out.println("Driver " + driver.getName() + " submitted bid of $" + price + " for ride " + rideRequest.getId());
+        return bid;
     }
 }

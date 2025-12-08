@@ -9,21 +9,24 @@ import java.util.List;
 @Service
 public class RideService {
 
-    private MatchService matchService;
-    private List<Driver> drivers;
+    private final MatchService matchService;
+    private final List<Driver> drivers;
+    private final Passenger currentPassenger;
     private RideRequest currentRideRequest;
-    private Passenger currentPassenger;
 
     public RideService() {
-        this.drivers = new ArrayList<>();
-        // Initialize with 4 drivers with vehicle info
-        drivers.add(new Driver("1", "Driver 1", "1234567890", "Toyota Camry - ABC123", true));
-        drivers.add(new Driver("2", "Driver 2", "0987654321", "Honda Civic - XYZ789", true));
-        drivers.add(new Driver("3", "Driver 3", "1112223333", "Tesla Model 3 - TES456", true));
-        drivers.add(new Driver("4", "Driver 4", "4445556666", "BMW 3 Series - BMW999", true));
-        
+        this.drivers = initializeDrivers();
         this.matchService = new MatchService(drivers);
         this.currentPassenger = new Passenger("p1", "Passenger 1", "5555555555");
+    }
+
+    private List<Driver> initializeDrivers() {
+        List<Driver> driverList = new ArrayList<>();
+        driverList.add(new Driver("1", "Wilson Wong", "1234567890", "Toyota Camry - ABC123", true));
+        driverList.add(new Driver("2", "Loyuyu Fu", "0987654321", "Honda Civic - XYZ789", true));
+        driverList.add(new Driver("3", "Jack Hung", "1112223333", "Tesla Model 3 - TES456", true));
+        driverList.add(new Driver("4", "Oswin Q", "4445556666", "BMW 3 Series - BMW999", true));
+        return driverList;
     }
 
     public List<Driver> getAllDrivers() {
@@ -35,25 +38,19 @@ public class RideService {
     }
 
     public RideRequest createRideRequest(String pickUpLocation, String destination, String expectedPickUpTime) {
-        currentRideRequest = currentPassenger.createRequest(pickUpLocation, destination, expectedPickUpTime);
-        matchService.addRideRequest(currentRideRequest);
+        currentRideRequest = matchService.createRideRequest(currentPassenger, pickUpLocation, destination, expectedPickUpTime);
         return currentRideRequest;
     }
     
     public void cancelRideRequest() {
         if (currentRideRequest != null) {
-            currentPassenger.cancelRide(currentRideRequest);
+            matchService.cancelRideRequest(currentRideRequest);
             currentRideRequest = null;  // 清空當前請求
         }
     }
 
     public RideRequest getCurrentRideRequest() {
         return currentRideRequest;
-    }
-
-    public List<Bid> getPendingBids() {
-        if (currentRideRequest == null) return new ArrayList<>();
-        return currentRideRequest.getPendingBids();
     }
 
     public List<Bid> getAllBids() {
@@ -67,44 +64,12 @@ public class RideService {
             return null;
         }
         
-        Driver driver = getDriverById(driverId);
-        if (driver != null) {
-            return driver.submitBid(currentRideRequest, price);
-        }
-        return null;
-    }
-
-    public void withdrawBid(String bidId, String driverId) {
-        if (currentRideRequest == null) return;
-        
-        Driver driver = getDriverById(driverId);
-        if (driver == null) return;
-        
-        // Find the bid
-        for (Bid bid : currentRideRequest.getBids()) {
-            if (bid.getId().equals(bidId)) {
-                driver.withdrawBid(bid, currentRideRequest);
-                return;
-            }
-        }
+        return matchService.submitBid(driverId, price, currentRideRequest);
     }
 
     public void passengerSelectBid(String bidId) {
         if (currentRideRequest == null) return;
-        
-        // Find the bid
-        for (Bid bid : currentRideRequest.getBids()) {
-            if (bid.getId().equals(bidId)) {
-                currentPassenger.selectBid(bid, currentRideRequest);
-                
-                // Mark driver as unavailable
-                Driver driver = getDriverById(bid.getDriverId());
-                if (driver != null) {
-                    driver.setAvailable(false);
-                }
-                return;
-            }
-        }
+        matchService.selectBid(bidId, currentRideRequest);
     }
 
     public String getMatchedContactInfo() {
