@@ -29,7 +29,7 @@ public class Passenger {
 
     // must
     public List<Bid> updateBideList(RideRequest currentRideRequest) {
-        if (currentRideRequest != null) {
+        if (currentRideRequest != null && currentRideRequest.getStatus() == RequestStatus.INITIATE) {
             System.out.println("Current bids:" + currentRideRequest.getBids());
             return currentRideRequest.getBids();
         }

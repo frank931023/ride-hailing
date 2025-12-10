@@ -39,4 +39,9 @@ public class Bid {
     public boolean isPending() {
         return !accepted;
     }
+
+    @Override
+    public String toString() {
+        return "Name:" + this.driver.getName() + ", price: " + this.price;
+    }
 }

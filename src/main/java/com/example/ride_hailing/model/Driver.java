@@ -53,8 +53,10 @@ public class Driver {
 
     // must
     public void notifyMatchInfo(RideRequest rideRequest) {
+        Passenger passenger = rideRequest.getPassenger();
         System.out.println("Driver " + name + " notified of match for ride: " + rideRequest.getId());
-        System.out.println("  Passenger: " + rideRequest.getPassenger().getName());
+        System.out.println("Passenger: " + passenger.getName());
+        System.out.println("Passenger phone number: " + passenger.getPhoneNumber());
         System.out.println("  Pick up: " + rideRequest.getPickUpLocation());
     }
 }
