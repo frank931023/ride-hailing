@@ -54,8 +54,7 @@ public class RideService {
     }
 
     public List<Bid> getAllBids() {
-        if (currentRideRequest == null) return new ArrayList<>();
-        return currentRideRequest.getBids();
+        return currentPassenger.updateBideList(currentRideRequest);
     }
 
     public Bid submitBid(Driver driver, int price) {
