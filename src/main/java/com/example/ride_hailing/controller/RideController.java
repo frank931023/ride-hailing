@@ -47,15 +47,16 @@ public class RideController {
     }
 
     @GetMapping("/bids")
-    public List<Bid> getAllBids() {
+        public List<Bid> getAllBids() {
         return rideService.getAllBids();
     }
 
     @PostMapping("/bids/submit")
     public Bid submitBid(@RequestBody Map<String, Object> payload) {
         String driverId = (String) payload.get("driverId");
+        Driver driver = rideService.getDriverById(driverId);
         int price = ((Number) payload.get("price")).intValue();
-        return rideService.submitBid(driverId, price);
+        return rideService.submitBid(driver, price);
     }
 
     @PostMapping("/bids/select")

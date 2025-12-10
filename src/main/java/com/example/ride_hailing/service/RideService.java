@@ -58,13 +58,13 @@ public class RideService {
         return currentRideRequest.getBids();
     }
 
-    public Bid submitBid(String driverId, int price) {
+    public Bid submitBid(Driver driver, int price) {
         if (currentRideRequest == null) {
             System.out.println("No active ride request.");
             return null;
         }
         
-        return matchService.submitBid(driverId, price, currentRideRequest);
+        return matchService.submitBid(driver, price, currentRideRequest);
     }
 
     public void passengerSelectBid(String bidId) {

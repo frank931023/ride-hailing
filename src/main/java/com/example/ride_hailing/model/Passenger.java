@@ -36,11 +36,28 @@ public class Passenger {
     }
 
     // must
-    public void showMatchSucess(RideRequest currentRideRequest) {
-        if (currentRideRequest != null && currentRideRequest.getStatus() == RequestStatus.MATCHED) {
-            System.out.println("Match Success! Ride " + currentRideRequest.getId() + " is matched.");
-        } else {
-            System.out.println("No successful match yet.");
+    public String showMatchSuccess(RideRequest rideRequest) {
+        if (rideRequest.getStatus() != RequestStatus.MATCHED) {
+            return "Cannot exchange contact info. Ride is not matched.";
         }
+
+        Bid selectedBid = rideRequest.getSelectedBid();
+        if (selectedBid == null) {
+            return "No bid selected.";
+        }
+        Driver driver = selectedBid.getDriver();
+        if (driver == null) {
+            return "Driver not found.";
+        }
+        Passenger passenger = rideRequest.getPassenger();
+        if (passenger == null) {
+            return "Passenger not found.";
+        }
+
+        String info = "Match completed! Contact information exchanged:\n";
+        info += "Passenger: " + passenger.getName() + " - " + passenger.getPhoneNumber() + "\n";
+        info += "Driver: " + driver.getName() + " - " + driver.getPhoneNumber();
+        System.out.println(info);
+        return info;
     }
 }

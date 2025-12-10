@@ -52,27 +52,13 @@ public class MatchService {
     }
 
     public String exchangeContactInfo(RideRequest rideRequest) {
-        if (rideRequest.getStatus() != RequestStatus.MATCHED) {
-            return "Cannot exchange contact info. Ride is not matched.";
-        }
-        
-        Bid selectedBid = rideRequest.getSelectedBid();
-        if (selectedBid == null) {
-            return "No bid selected.";
-        }
-        
-        Driver driver = getDriverById(selectedBid.getDriver().getId());
-        if (driver == null) {
-            return "Driver not found.";
-        }
-        
+        // get Driver
+        Driver driver = rideRequest.getSelectedBid().getDriver();
         Passenger passenger = rideRequest.getPassenger();
-        
-        String info = "Match completed! Contact information exchanged:\n";
-        info += "Passenger: " + passenger.getName() + " - " + passenger.getPhoneNumber() + "\n";
-        info += "Driver: " + driver.getName() + " - " + driver.getPhoneNumber();
-        
-        System.out.println(info);
+        // 叫passenger 方法
+        String info = passenger.showMatchSuccess(rideRequest);
+        // 叫driver 方法
+        driver.notifyMatchInfo(rideRequest);
         return info;
     }
 
@@ -99,15 +85,14 @@ public class MatchService {
     }
 
     // must
-    public Bid submitBid(String driverId, int price, RideRequest rideRequest) {
+    public Bid submitBid(Driver driver, int price, RideRequest rideRequest) {
         if (rideRequest.getStatus() != RequestStatus.INITIATE) {
             System.out.println("Cannot submit bid. RideRequest is not in INITIATE status.");
             return null;
         }
         
-        Driver driver = getDriverById(driverId);
         if (driver == null) {
-            System.out.println("Driver not found: " + driverId);
+            System.out.println("Driver not found");
             return null;
         }
 
