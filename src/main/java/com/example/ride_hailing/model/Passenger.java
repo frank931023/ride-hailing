@@ -30,6 +30,7 @@ public class Passenger {
     // must
     public List<Bid> updateBideList(RideRequest currentRideRequest) {
         if (currentRideRequest != null) {
+            System.out.println("Current bids:" + currentRideRequest.getBids());
             return currentRideRequest.getBids();
         }
         return new ArrayList<>();
