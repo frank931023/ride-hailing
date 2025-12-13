@@ -1,4 +1,4 @@
-# 「系統分析與設計」課程作業 -- 簡易乘車配對系統 (Ride-Hailing System)
+# 系統分析與設計作業--簡易乘車配對系統 (Ride-Hailing System)
 
 - 這是一個基於 Java Spring Boot 開發的簡易乘車配對平台，模擬了乘客發送乘車請求、司機報價以及乘客選擇司機進行配對的完整流程。
 
@@ -22,8 +22,8 @@
 ## 安裝與啟動教學
 
 ### 環境需求
-- **Docker** (推薦)
-- 或 **Java JDK 17+** 與 **Maven**
+- **Docker**
+- **Java JDK 17+** 與 **Maven**
 
 ### 方法一：Docker
 
