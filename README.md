@@ -1,7 +1,6 @@
-# 簡易乘車配對系統 (Ride-Hailing System)
+# 「系統分析與設計」課程作業 -- 簡易乘車配對系統 (Ride-Hailing System)
 
-- 本專案為「系統分析與設計」課程作業 (System Analysis and Design)
-- 這是一個基於 Spring Boot 開發的簡易乘車配對平台，模擬了乘客發送乘車請求、司機報價以及乘客選擇司機進行配對的完整流程。
+- 這是一個基於 Java Spring Boot 開發的簡易乘車配對平台，模擬了乘客發送乘車請求、司機報價以及乘客選擇司機進行配對的完整流程。
 
 ## 👥 組員資訊
 - 資管三 112403531 汪筠涵
@@ -11,18 +10,51 @@
 - 資管三 112403543 王暐元
 
 
-## 📖 系統簡介
+## 系統簡介
 
-本系統旨在展示一個前後端分離（但在本專案中整合於同一 Spring Boot 應用）的叫車服務架構。
+系統架構前後端分離，旨在展示一個簡易的叫車服務架構 (前端為 GenAI 生成之單一 HTML 檔案)。
 - **乘客**：可以輸入上車地點、目的地與時間，發送請求，並查看司機的即時報價。
 - **司機**：可以查看線上的乘車請求並提交報價。
 - **配對**：乘客從報價列表中選擇心儀的司機，完成配對並交換聯絡資訊。
 
 ---
 
-## 📂 專案結構與重要文件說明
+## 安裝與啟動教學
 
-本專案採用標準的 MVC 分層架構，主要程式碼位於 `src/main/java/com/example/ride_hailing/` 下。
+### 環境需求
+- **Docker** (推薦)
+- 或 **Java JDK 17+** 與 **Maven**
+
+### 方法一：Docker
+
+1. 開啟終端機 (Terminal/PowerShell)。
+2. 進入專案根目錄。
+3. 執行以下指令：
+   ```bash
+   docker compose up --build
+   ```
+4. 等待看到 `Started RideHailingApplication` 字樣。
+5. 開啟瀏覽器訪問：[http://localhost:8080](http://localhost:8080)
+
+---
+
+### 方法二：使用 Maven 本機執行
+
+1. 確保已安裝 JDK 17 或以上版本。
+2. 在專案根目錄執行：
+   - **Windows**:
+     ```powershell
+     .\mvnw spring-boot:run
+     ```
+   - **Mac/Linux**:
+     ```bash
+     ./mvnw spring-boot:run
+     ```
+3. 啟動後訪問：[http://localhost:8080](http://localhost:8080)
+
+## 專案結構說明
+
+採用標準的 MVC 分層架構，主要程式碼位於 `src/main/java/com/example/ride_hailing/` 下。
 
 ### 1. Controller 層 (`controller/`)
 負責接收前端的 HTTP 請求，並將請求轉發給 Service 層處理。
@@ -53,7 +85,7 @@
 
 ---
 
-## 🔄 系統交互流程 (Interaction Flow)
+## 系統交互流程
 
 以下說明一個完整的叫車流程是如何在各個檔案間交互運作的：
 
@@ -80,42 +112,3 @@
     - **前端** 顯示配對成功資訊。
 
 ---
-
-## 🚀 安裝與啟動教學
-
-### 環境需求
-- **Docker** (推薦)
-- 或 **Java JDK 17+** 與 **Maven**
-
-### 方法一：使用 Docker (最簡單)
-這是最推薦的啟動方式，無需在本機安裝 Java 環境。
-
-1. 開啟終端機 (Terminal/PowerShell)。
-2. 進入專案根目錄。
-3. 執行以下指令：
-   ```bash
-   docker compose up --build
-   ```
-4. 等待看到 `Started RideHailingApplication` 字樣。
-5. 開啟瀏覽器訪問：[http://localhost:8080](http://localhost:8080)
-
-### 方法二：使用 Maven 本機執行
-如果你想在本地開發或除錯：
-
-1. 確保已安裝 JDK 17 或以上版本。
-2. 在專案根目錄執行：
-   - **Windows**:
-     ```powershell
-     .\mvnw spring-boot:run
-     ```
-   - **Mac/Linux**:
-     ```bash
-     ./mvnw spring-boot:run
-     ```
-3. 啟動後訪問：[http://localhost:8080](http://localhost:8080)
-
----
-
-## 🛠️ 開發者資訊
-- **Repository Owner**: frank931023
-- **Current Branch**: dev_yuan_1203
