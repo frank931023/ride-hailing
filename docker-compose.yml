@@ -4,5 +4,17 @@ services:
     build: .
     ports:
       - "8080:8080"
+      - "5005:5005"  # Debug port
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - SPRING_DEVTOOLS_LIVERELOAD_ENABLED=true
+    volumes:
+      # 掛載源碼目錄實現 hot-reload
+      - ./src:/app/src:delegated
+      # 掛載 Maven 本地倉庫以加速構建
+      - ~/.m2:/root/.m2:cached
+      # 避免掛載 target 目錄
+      - /app/target
+    stdin_open: true
+    tty: true

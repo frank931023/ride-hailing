@@ -1,6 +1,8 @@
 package com.example.ride_hailing.controller;
 
-import com.example.ride_hailing.model.*;
+import com.example.ride_hailing.model.Bid;
+import com.example.ride_hailing.model.Driver;
+import com.example.ride_hailing.model.RideRequest;
 import com.example.ride_hailing.service.RideService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -12,8 +14,12 @@ import java.util.Map;
 @RequestMapping("/api/rides")
 public class RideController {
 
+    private final RideService rideService;
+
     @Autowired
-    private RideService rideService;
+    public RideController(RideService rideService) {
+        this.rideService = rideService;
+    }
 
     @GetMapping("/drivers")
     public List<Driver> getAllDrivers() {
@@ -22,14 +28,17 @@ public class RideController {
 
     @PostMapping("/request")
     public RideRequest requestRide(@RequestBody Map<String, String> payload) {
-        String pickUpLocation = payload.get("pickUpLocation");
-        String destination = payload.get("destination");
-        return rideService.createRideRequest(pickUpLocation, destination);
+        return rideService.createRideRequest(
+            payload.get("pickUpLocation"), 
+            payload.get("destination"), 
+            payload.get("expectedPickUpTime")
+        );
     }
 
     @PostMapping("/cancel")
-    public void cancelRide() {
+    public Map<String, String> cancelRide() {
         rideService.cancelRideRequest();
+        return Map.of("message", "Ride request cancelled");
     }
 
     @GetMapping("/current")
@@ -37,28 +46,37 @@ public class RideController {
         return rideService.getCurrentRideRequest();
     }
 
-    @GetMapping("/available-drivers")
-    public List<Driver> getAvailableDrivers() {
-        return rideService.getAvailableDrivers();
+    @GetMapping("/bids")
+        public List<Bid> getAllBids() {
+        return rideService.getAllBids();
     }
 
-    @PostMapping("/choose-driver")
-    public void chooseDriver(@RequestBody Map<String, String> payload) {
-        String driverName = payload.get("driverName");
-        rideService.passengerChooseDriver(driverName);
+    @PostMapping("/bids/submit")
+    public Bid submitBid(@RequestBody Map<String, Object> payload) {
+        String driverId = (String) payload.get("driverId");
+        Driver driver = rideService.getDriverById(driverId);
+        int price = ((Number) payload.get("price")).intValue();
+        return rideService.submitBid(driver, price);
     }
 
-    @PostMapping("/driver-confirm")
-    public boolean driverConfirm(@RequestBody Map<String, Object> payload) {
-        String driverName = (String) payload.get("driverName");
-        boolean confirm = (Boolean) payload.get("confirm");
-        return rideService.driverConfirmRide(driverName, confirm);
+    @PostMapping("/bids/select")
+    public Map<String, String> selectBid(@RequestBody Map<String, String> payload) {
+        String bidId = payload.get("bidId");
+        rideService.passengerSelectBid(bidId);
+        return Map.of("message", "Bid selected, ride matched!");
+    }
+
+    @GetMapping("/contact-info")
+    public Map<String, String> getContactInfo() {
+        String info = rideService.getMatchedContactInfo();
+        return Map.of("info", info);
     }
 
     @PostMapping("/driver-status")
-    public void setDriverStatus(@RequestBody Map<String, Object> payload) {
-        String driverName = (String) payload.get("driverName");
+    public Map<String, String> setDriverStatus(@RequestBody Map<String, Object> payload) {
+        String driverId = (String) payload.get("driverId");
         boolean available = (Boolean) payload.get("available");
-        rideService.setDriverAvailability(driverName, available);
+        rideService.setDriverAvailability(driverId, available);
+        return Map.of("message", "Driver status updated");
     }
 }

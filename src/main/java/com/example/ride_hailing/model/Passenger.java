@@ -1,7 +1,7 @@
 package com.example.ride_hailing.model;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class Passenger {
 
@@ -15,6 +15,10 @@ public class Passenger {
         this.phoneNumber = phoneNumber;
     }
 
+    public String getId() {
+        return id;
+    }
+
     public String getName() {
         return name;
     }
@@ -23,37 +27,38 @@ public class Passenger {
         return phoneNumber;
     }
 
-    public RideRequest requestRide(String pickUpLocation, String destination) {
-        RideRequest rideRequest = new RideRequest();
-        rideRequest.newRide(this, pickUpLocation, destination);
-        System.out.println("Ride requested by passenger: " + name);
-        return rideRequest;
+    // must
+    public List<Bid> updateBideList(RideRequest currentRideRequest) {
+        if (currentRideRequest != null && currentRideRequest.getStatus() == RequestStatus.INITIATE) {
+            System.out.println("Current bids:" + currentRideRequest.getBids());
+            return currentRideRequest.getBids();
+        }
+        return new ArrayList<>();
     }
 
-    // the passenger cancel the ride "actively"
-    public void cancelRide(RideRequest rideRequest) {
-        // if (!rideRequest.getPassenger().equals(this)) {
-        //     System.out.println("This passenger is not associated with the ride.");
-        //     return;
-        // }
-        rideRequest.updateStatus("Cancelled");
-        System.out.println("Ride canceled by passenger: " + name);
-    }
-
-    public void chooseDriver(List<Driver> availableDrivers, RideRequest rideRequest) {
-        if (availableDrivers == null || availableDrivers.isEmpty()) {
-            System.out.println("No drivers available to choose from.");
-            return;
+    // must
+    public String showMatchSuccess(RideRequest rideRequest) {
+        if (rideRequest.getStatus() != RequestStatus.MATCHED) {
+            return "Cannot exchange contact info. Ride is not matched.";
         }
 
-        // For simplicity, choose the first available driver
-        Driver chosenDriver = availableDrivers.get(0);
-        if (chosenDriver.isAvailable()) {
-            rideRequest.setDriver(chosenDriver);
-            System.out.println("Driver chosen: " + chosenDriver.getName());
-        } else {
-            System.out.println("Driver is no longer available.");
+        Bid selectedBid = rideRequest.getSelectedBid();
+        if (selectedBid == null) {
+            return "No bid selected.";
         }
-    }
+        Driver driver = selectedBid.getDriver();
+        if (driver == null) {
+            return "Driver not found.";
+        }
+        Passenger passenger = rideRequest.getPassenger();
+        if (passenger == null) {
+            return "Passenger not found.";
+        }
 
+        String info = "Match completed! Contact information exchanged:\n";
+        info += "Passenger: " + passenger.getName() + " - " + passenger.getPhoneNumber() + "\n";
+        info += "Driver: " + driver.getName() + " - " + driver.getPhoneNumber();
+        System.out.println(info);
+        return info;
+    }
 }
